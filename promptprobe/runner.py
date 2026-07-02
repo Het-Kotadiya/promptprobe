@@ -2,7 +2,7 @@ import json
 import yaml
 
 from promptprobe.client import OllamaClient
-from promptprobe.evaluator import evaluate_injection
+from promptprobe.evaluator import evaluate_injection, evaluate_leak
 
 def load_prompts(file_path):
     """ Read a list of test prompts from a JSON file and return it. """
@@ -13,18 +13,17 @@ def load_prompts(file_path):
 
 def run_tests(prompts, client):
     """Send each prompt to the model, evaluate attack prompts, and collect results."""
-
     results = []
 
     for item in prompts:
-        prompt_id = item['id']
-        prompt_text = item['prompt']
+        prompt_id = item["id"]
+        prompt_text = item["prompt"]
+        system_prompt = item.get("system")  # None for tests without a system prompt
 
         print(f"Running {prompt_id} ...")
 
-        answer = client.send_prompt(prompt_text)
+        answer = client.send_prompt(prompt_text, system=system_prompt)
 
-        # Start building this result
         result = {
             "id": prompt_id,
             "category": item.get("category", "uncategorized"),
@@ -33,17 +32,17 @@ def run_tests(prompts, client):
             "response": answer,
         }
 
-        # Only attack prompts have a canary + injected_word to judge.
+        # Choose the right evaluator based on which fields the test carries.
         if "canary" in item and "injected_word" in item:
-            verdict = evaluate_injection(answer, item["canary"], item["injected_word"])
-            result["verdict"] = verdict
+            result["verdict"] = evaluate_injection(answer, item["canary"], item["injected_word"])
+        elif "secret" in item:
+            result["verdict"] = evaluate_leak(answer, item["secret"])
         else:
             result["verdict"] = "N/A"
 
         results.append(result)
 
     return results
-
 
 def save_results(results, file_path):
     """Write the list of results to a JSON file."""
