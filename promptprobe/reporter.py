@@ -1,5 +1,6 @@
 from collections import Counter, defaultdict
-
+from rich.console import Console
+from rich.table import Table
 
 def generate_markdown(results):
     """Turn a list of results into a structured Markdown report (as a single string)."""
@@ -39,6 +40,40 @@ def generate_markdown(results):
 
     return "\n".join(lines)
 
+def print_console_summary(results):
+    """Print a colored summary table of results to the terminal using rich."""
+    console = Console()
+    table = Table(title="PromptProbe Results")
+
+    # Define the columns
+    table.add_column("ID", style="cyan")
+    table.add_column("Category")
+    table.add_column("OWASP")
+    table.add_column("Verdict")
+
+    # A color for each verdict type
+    verdict_colors = {
+        "PASS": "green",
+        "FAIL": "red",
+        "PARTIAL": "yellow",
+        "UNCLEAR": "magenta",
+        "N/A": "dim",
+    }
+
+    # Add one row per result
+    for result in results:
+        verdict = result["verdict"]
+        color = verdict_colors.get(verdict, "white")
+        colored_verdict = f"[{color}]{verdict}[/{color}]"
+
+        table.add_row(
+            result["id"],
+            result.get("category", "uncategorized"),
+            result.get("owasp", "N/A"),
+            colored_verdict,
+        )
+
+    console.print(table)
 
 def save_report(report_text, filepath):
     """Write the report text to a file."""
