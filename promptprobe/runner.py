@@ -1,7 +1,6 @@
 import json
 import yaml
 
-from promptprobe.client import OllamaClient
 from promptprobe.evaluator import evaluate_injection, evaluate_leak
 
 def load_prompts(file_path):

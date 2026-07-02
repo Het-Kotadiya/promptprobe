@@ -1,6 +1,5 @@
 import requests
 
-
 class OllamaClient:
     """A simple helper that sends prompts to a local Ollama model."""
 
