@@ -1,9 +1,10 @@
 import json
+import yaml
 
 def load_prompts(file_path):
     """ Read a list of test prompts from a JSON file and return it. """
     with open(file_path, 'r', encoding='utf-8') as file:
-        prompts = json.load(file)
+        prompts = yaml.safe_load(file)
     return prompts
 
 
