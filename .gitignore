@@ -1,0 +1,17 @@
+# Python cache files
+__pycache__/
+*.pyc
+
+# PyCharm's private project settings
+.idea/
+
+# Virtual environments (in case you create one later)
+.venv/
+venv/
+env/
+
+# Generated reports (we'll keep one curated example elsewhere for reviewers)
+reports/
+
+# Personal scratch file for experimenting (not part of the real tool)
+scratch.py
