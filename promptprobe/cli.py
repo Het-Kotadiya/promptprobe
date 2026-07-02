@@ -38,9 +38,16 @@ def main():
     print(f"Testing model: {args.model}")
     print(f"Loading tests from: {args.tests}\n")
 
-    prompts = load_prompts(args.tests)
-    client = OllamaClient(model=args.model)
-    results = run_tests(prompts, client)
+    try:
+        prompts = load_prompts(args.tests)
+        client = OllamaClient(model=args.model)
+        results = run_tests(prompts, client)
+    except FileNotFoundError:
+        print(f"ERROR: Could not find the test file '{args.tests}'. Check the path and try again.")
+        return
+    except RuntimeError as error:
+        print(f"ERROR: {error}")
+        return
 
     save_results(results, args.json_out)
     report = generate_markdown(results)
