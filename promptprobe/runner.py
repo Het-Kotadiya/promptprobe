@@ -27,6 +27,8 @@ def run_tests(prompts, client):
         # Start building this result
         result = {
             "id": prompt_id,
+            "category": item.get("category", "uncategorized"),
+            "owasp": item.get("owasp", "N/A"),
             "prompt": prompt_text,
             "response": answer,
         }
