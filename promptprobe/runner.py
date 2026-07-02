@@ -1,6 +1,9 @@
 import json
 import yaml
 
+from promptprobe.client import OllamaClient
+from promptprobe.evaluator import evaluate_injection
+
 def load_prompts(file_path):
     """ Read a list of test prompts from a JSON file and return it. """
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -8,8 +11,8 @@ def load_prompts(file_path):
     return prompts
 
 
-def run_test(prompts, client):
-    """ Send each prompt to the model and collect all the results."""
+def run_tests(prompts, client):
+    """Send each prompt to the model, evaluate attack prompts, and collect results."""
 
     results = []
 
@@ -21,11 +24,21 @@ def run_test(prompts, client):
 
         answer = client.send_prompt(prompt_text)
 
-        results.append({
+        # Start building this result
+        result = {
             "id": prompt_id,
             "prompt": prompt_text,
-            "response": answer
-        })
+            "response": answer,
+        }
+
+        # Only attack prompts have a canary + injected_word to judge.
+        if "canary" in item and "injected_word" in item:
+            verdict = evaluate_injection(answer, item["canary"], item["injected_word"])
+            result["verdict"] = verdict
+        else:
+            result["verdict"] = "N/A"
+
+        results.append(result)
 
     return results
 
